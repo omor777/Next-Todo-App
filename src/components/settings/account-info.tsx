@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import {
   Card,
   CardContent,
@@ -8,8 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
+import dayjs from "@/lib/dayjs";
 
 export function AccountInfo() {
   const { data: session, isPending } = authClient.useSession();
@@ -41,13 +42,9 @@ export function AccountInfo() {
     );
   }
 
-  const formattedCreatedAt = new Date(
-    session.user.createdAt,
-  ).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const formattedCreatedAt = dayjs(session.user.createdAt).format(
+    "MMMM D, YYYY",
+  );
 
   return (
     <Card>
