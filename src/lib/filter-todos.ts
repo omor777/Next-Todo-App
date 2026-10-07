@@ -28,7 +28,21 @@ export function countTodos(todos: Todo[]): Record<TodoFilter, number> {
 
   return {
     all: todos.length,
-    active,
+  active,
     completed,
   };
+}
+
+
+// ADD THIS
+export function searchTodos(todos: Todo[], searchQuery: string): Todo[] {
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+
+  if (normalizedQuery.length === 0) {
+    return todos
+  }
+
+  return todos.filter((todo) =>
+    todo.title.toLowerCase().includes(normalizedQuery),
+  )
 }

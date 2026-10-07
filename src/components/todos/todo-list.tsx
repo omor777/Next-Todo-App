@@ -1,7 +1,7 @@
 "use client";
 
 import { useTodos, type Todo } from "@/hooks/use-todos";
-import { countTodos, filterTodos } from "@/lib/filter-todos";
+import { countTodos, filterTodos, searchTodos } from "@/lib/filter-todos";
 import { TodoItem } from "./todo-item";
 import { CreateTodoForm } from "./create-todo-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,13 +9,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TodoFilter } from "@/lib/todos/filters";
 import { TodoFilters } from "./todo-filters";
+import { TodoSearch } from "./todo-search";
 
 type TodoListProps = {
-  initialTodos: Todo[];
-  filter: TodoFilter;
-};
+  initialTodos: Todo[]
+  filter: TodoFilter
+  searchQuery: string
+}
 
-export function TodoList({ initialTodos, filter }: TodoListProps) {
+export function TodoList({ initialTodos, filter, searchQuery }: TodoListProps) {
   const {
     data: todos,
     isLoading,
@@ -24,10 +26,9 @@ export function TodoList({ initialTodos, filter }: TodoListProps) {
     initialData: initialTodos,
   });
 
-  const visible = todos ? filterTodos(todos, filter) : [];
-  const counts = todos
-    ? countTodos(todos)
-    : { all: 0, active: 0, completed: 0 };
+ const counts = todos ? countTodos(todos) : { all: 0, active: 0, completed: 0 };
+ const filteredByStatus = todos ? filterTodos(todos, filter) : [];
+ const visible = searchTodos(filteredByStatus, searchQuery);
 
 
   return (
@@ -39,6 +40,7 @@ export function TodoList({ initialTodos, filter }: TodoListProps) {
           <CardTitle>Your todos</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <TodoSearch />
           <TodoFilters counts={counts} />
 
           {isLoading && (
@@ -59,7 +61,9 @@ export function TodoList({ initialTodos, filter }: TodoListProps) {
           {!isLoading && !error && visible.length === 0 && (
             <Alert>
               <AlertTitle>Nothing here</AlertTitle>
-              <AlertDescription>{emptyMessage(filter)}</AlertDescription>
+              <AlertDescription>
+                {emptyMessage(filter, searchQuery)}
+              </AlertDescription>
             </Alert>
           )}
 
@@ -76,7 +80,11 @@ export function TodoList({ initialTodos, filter }: TodoListProps) {
   );
 }
 
-function emptyMessage(filter: TodoFilter): string {
+function emptyMessage(filter: TodoFilter, searchQuery: string): string {
+  if (searchQuery.trim().length > 0) {
+    return `No todos match "${searchQuery}".`;
+  }
+
   switch (filter) {
     case "active":
       return "No active todos. Nice work.";
