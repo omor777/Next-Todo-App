@@ -51,6 +51,8 @@ export function TodoList({
   );
 
  const counts = todos ? countTodos(todos) : { all: 0, active: 0, completed: 0 };
+
+ 
  const filteredByStatus = todos ? filterTodos(todos, filter) : [];
  const filteredByPriority = filterByPriority(filteredByStatus, priorityFilter);
  const filteredByDue = filterByDueDate(filteredByPriority, dueFilter);

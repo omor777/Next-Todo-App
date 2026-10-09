@@ -18,9 +18,10 @@ import { UserMenu } from "./user-menu";
 
 const navItems = [
   { href: "/dashboard", label: "Todos" },
-  { href: "/dashboard/completed", label: "Completed" },
+  { href: "/dashboard/stats", label: "Stats" },
   { href: "/dashboard/settings", label: "Settings" },
 ];
+
 
 export function Navbar() {
   const pathname = usePathname();

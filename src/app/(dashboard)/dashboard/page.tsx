@@ -1,5 +1,5 @@
-import { requireSession } from "@/lib/session";
 import { serverFetch } from "@/lib/server-fetch";
+import { requireSession } from "@/lib/session";
 import {
   isTodoDueFilter,
   isTodoFilter,
@@ -34,11 +34,15 @@ export default async function DashboardPage({
   const filter: TodoFilter = isTodoFilter(params.filter)
     ? params.filter
     : "all";
+
   const searchQuery = (params.q ?? "").slice(0, 200);
+
   const sort: TodoSort = isTodoSort(params.sort) ? params.sort : "newest";
+
   const priorityFilter: TodoPriority | null = isTodoPriority(params.priority)
     ? params.priority
     : null;
+
   const dueFilter: TodoDueFilter | null = isTodoDueFilter(params.due)
     ? params.due
     : null;
