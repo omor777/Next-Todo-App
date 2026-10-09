@@ -3,16 +3,20 @@
 import { ClearCompletedButton } from "@/components/todos/clear-completed-button";
 import { CreateTodoForm } from "@/components/todos/create-todo-form";
 import { TodoFilters } from "@/components/todos/todo-filters";
-import { TodoItem } from "@/components/todos/todo-item";
 import { TodoSearch } from "@/components/todos/todo-search";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTodos, type Todo } from "@/hooks/use-todos";
 import { countTodos, filterTodos, searchTodos } from "@/lib/filter-todos";
 import { sortTodos } from "@/lib/todos/sort-todos";
 import { TodoFilter, TodoSort } from "@/types/todo";
+import { CheckSquare } from "lucide-react";
+import { useState } from "react";
 import { TodoSortSelector } from "./todo-sort-selector";
+import { SelectionToolbar } from "./selection-toolbar";
+import { TodoItem } from "./todo-item";
 
 type TodoListProps = {
   initialTodos: Todo[];
@@ -35,15 +39,37 @@ export function TodoList({
     initialData: initialTodos,
   });
 
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedTodoIds, setSelectedTodoIds] = useState<Set<string>>(
+    new Set(),
+  );
+
   const counts = todos
     ? countTodos(todos)
     : { all: 0, active: 0, completed: 0 };
 
-
-
   const filteredByStatus = todos ? filterTodos(todos, filter) : [];
   const searchedTodos = searchTodos(filteredByStatus, searchQuery);
   const visible = sortTodos(searchedTodos, sort);
+
+  const handleSelectionChange = (todoId: string, nextSelected: boolean) => {
+    setSelectedTodoIds((previousIds) => {
+      const nextIds = new Set(previousIds);
+      if (nextSelected) nextIds.add(todoId);
+      else nextIds.delete(todoId);
+      return nextIds;
+    });
+  };
+
+  const handleCancelSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedTodoIds(new Set());
+  };
+
+  const handleDeleteSuccess = () => {
+    setIsSelectionMode(false);
+    setSelectedTodoIds(new Set());
+  };
 
   return (
     <div className="space-y-4">
@@ -53,7 +79,19 @@ export function TodoList({
         <CardHeader>
           <div className="flex items-center justify-between gap-2">
             <CardTitle>Your todos</CardTitle>
-            <ClearCompletedButton completedCount={counts.completed} />
+            <div className="flex items-center gap-2">
+              {!isSelectionMode && visible.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsSelectionMode(true)}
+                >
+                  <CheckSquare />
+                  <span>Select</span>
+                </Button>
+              )}
+              <ClearCompletedButton completedCount={counts.completed} />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -89,12 +127,24 @@ export function TodoList({
           {visible.length > 0 && (
             <div className="space-y-2">
               {visible.map((todo) => (
-                <TodoItem key={todo.id} todo={todo} />
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  isSelectionMode={isSelectionMode}
+                  isSelected={selectedTodoIds.has(todo.id)}
+                  onSelectionChange={handleSelectionChange}
+                />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+      <SelectionToolbar
+        selectedCount={selectedTodoIds.size}
+        selectedIds={Array.from(selectedTodoIds)}
+        onCancelSelection={handleCancelSelection}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
     </div>
   );
 }

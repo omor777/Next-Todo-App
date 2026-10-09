@@ -94,3 +94,22 @@ export function useClearCompletedTodos() {
     },
   });
 }
+
+async function bulkDeleteTodos(
+  todoIds: string[],
+): Promise<{ deletedCount: number }> {
+  return api.post<{ deletedCount: number }>("/api/todos/bulk-delete", {
+    ids: todoIds,
+  });
+}
+
+export function useBulkDeleteTodos() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: bulkDeleteTodos,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+    },
+  });
+}

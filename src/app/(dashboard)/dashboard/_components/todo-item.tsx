@@ -30,7 +30,19 @@ const todoKeys = {
   list: () => [...todoKeys.all, "list"] as const,
 };
 
-export function TodoItem({ todo }: { todo: Todo }) {
+type TodoItemProps = {
+  todo: Todo;
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  onSelectionChange: (todoId: string, nextSelected: boolean) => void;
+};
+
+export function TodoItem({
+  todo,
+  isSelectionMode,
+  isSelected,
+  onSelectionChange,
+}: TodoItemProps) {
   const queryClient = useQueryClient();
   const updateTodo = useUpdateTodo();
   const deleteTodo = useDeleteTodo();
@@ -139,6 +151,15 @@ export function TodoItem({ todo }: { todo: Todo }) {
   return (
     <Card>
       <CardContent className="flex items-center gap-3">
+        {isSelectionMode && (
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(nextChecked) =>
+              onSelectionChange(todo.id, nextChecked === true)
+            }
+          />
+        )}
+
         <Checkbox checked={todo.completed} onCheckedChange={handleToggle} />
 
         {isEditing ? (
@@ -167,51 +188,55 @@ export function TodoItem({ todo }: { todo: Todo }) {
 
             {todo.completed && <Badge variant="secondary">Done</Badge>}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleStartEdit}
-              disabled={updateTodo.isPending}
-            >
-              <Pencil />
-            </Button>
-            <AlertDialog open={deleting} onOpenChange={setDeleting}>
-              <AlertDialogTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={deleteTodo.isPending}
-                  />
-                }
-              >
-                <Trash2 />
-              </AlertDialogTrigger>
-
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this todo?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    &ldquo;{todo.title}&rdquo; will be permanently deleted. This
-                    action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    variant="destructive"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDelete();
-                    }}
-                    disabled={deleteTodo.isPending}
+            {!isSelectionMode && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleStartEdit}
+                  disabled={updateTodo.isPending}
+                >
+                  <Pencil />
+                </Button>
+                <AlertDialog open={deleting} onOpenChange={setDeleting}>
+                  <AlertDialogTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={deleteTodo.isPending}
+                      />
+                    }
                   >
-                    {deleteTodo.isPending ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    <Trash2 />
+                  </AlertDialogTrigger>
+
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete this todo?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        &ldquo;{todo.title}&rdquo; will be permanently deleted.
+                        This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDelete();
+                        }}
+                        disabled={deleteTodo.isPending}
+                      >
+                        {deleteTodo.isPending ? "Deleting..." : "Delete"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
           </>
         )}
       </CardContent>
