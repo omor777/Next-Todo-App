@@ -1,5 +1,5 @@
 import type { Todo } from "@/hooks/use-todos";
-import { TodoFilter } from "./todos/filters";
+import { TodoFilter } from "@/types/todo";
 
 export function filterTodos(todos: Todo[], filter: TodoFilter): Todo[] {
   switch (filter) {

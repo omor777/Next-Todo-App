@@ -1,24 +1,32 @@
 "use client";
 
-import { useTodos, type Todo } from "@/hooks/use-todos";
-import { countTodos, filterTodos, searchTodos } from "@/lib/filter-todos";
-import { TodoItem } from "./todo-item";
-import { CreateTodoForm } from "./create-todo-form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ClearCompletedButton } from "@/components/todos/clear-completed-button";
+import { CreateTodoForm } from "@/components/todos/create-todo-form";
+import { TodoFilters } from "@/components/todos/todo-filters";
+import { TodoItem } from "@/components/todos/todo-item";
+import { TodoSearch } from "@/components/todos/todo-search";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TodoFilter } from "@/lib/todos/filters";
-import { TodoFilters } from "./todo-filters";
-import { TodoSearch } from "./todo-search";
-import { ClearCompletedButton } from "./clear-completed-button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTodos, type Todo } from "@/hooks/use-todos";
+import { countTodos, filterTodos, searchTodos } from "@/lib/filter-todos";
+import { sortTodos } from "@/lib/todos/sort-todos";
+import { TodoFilter, TodoSort } from "@/types/todo";
+import { TodoSortSelector } from "./todo-sort-selector";
 
 type TodoListProps = {
-  initialTodos: Todo[]
-  filter: TodoFilter
-  searchQuery: string
-}
+  initialTodos: Todo[];
+  filter: TodoFilter;
+  searchQuery: string;
+  sort: TodoSort;
+};
 
-export function TodoList({ initialTodos, filter, searchQuery }: TodoListProps) {
+export function TodoList({
+  initialTodos,
+  filter,
+  searchQuery,
+  sort,
+}: TodoListProps) {
   const {
     data: todos,
     isLoading,
@@ -27,10 +35,15 @@ export function TodoList({ initialTodos, filter, searchQuery }: TodoListProps) {
     initialData: initialTodos,
   });
 
- const counts = todos ? countTodos(todos) : { all: 0, active: 0, completed: 0 };
- const filteredByStatus = todos ? filterTodos(todos, filter) : [];
- const visible = searchTodos(filteredByStatus, searchQuery);
+  const counts = todos
+    ? countTodos(todos)
+    : { all: 0, active: 0, completed: 0 };
 
+
+
+  const filteredByStatus = todos ? filterTodos(todos, filter) : [];
+  const searchedTodos = searchTodos(filteredByStatus, searchQuery);
+  const visible = sortTodos(searchedTodos, sort);
 
   return (
     <div className="space-y-4">
@@ -46,6 +59,8 @@ export function TodoList({ initialTodos, filter, searchQuery }: TodoListProps) {
         <CardContent className="space-y-4">
           <TodoSearch />
           <TodoFilters counts={counts} />
+
+          <TodoSortSelector />
 
           {isLoading && (
             <div className="space-y-2">
