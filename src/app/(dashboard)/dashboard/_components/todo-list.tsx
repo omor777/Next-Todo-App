@@ -9,20 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTodos, type Todo } from "@/hooks/use-todos";
-import { countTodos, filterTodos, searchTodos } from "@/lib/filter-todos";
+import { countTodos, filterByDueDate, filterByPriority, filterTodos, searchTodos } from "@/lib/filter-todos";
 import { sortTodos } from "@/lib/todos/sort-todos";
-import { TodoFilter, TodoSort } from "@/types/todo";
+import { TodoDueFilter, TodoFilter, TodoPriority, TodoSort } from "@/types/todo";
 import { CheckSquare } from "lucide-react";
 import { useState } from "react";
 import { TodoSortSelector } from "./todo-sort-selector";
 import { SelectionToolbar } from "./selection-toolbar";
 import { TodoItem } from "./todo-item";
+import { PriorityFilter } from "./priority-filter";
+import { DueDateFilter } from "./due-date-filter";
 
 type TodoListProps = {
   initialTodos: Todo[];
   filter: TodoFilter;
   searchQuery: string;
   sort: TodoSort;
+  priorityFilter: TodoPriority | null;
+  dueFilter: TodoDueFilter | null;
 };
 
 export function TodoList({
@@ -30,6 +34,8 @@ export function TodoList({
   filter,
   searchQuery,
   sort,
+  priorityFilter,
+  dueFilter,
 }: TodoListProps) {
   const {
     data: todos,
@@ -44,13 +50,12 @@ export function TodoList({
     new Set(),
   );
 
-  const counts = todos
-    ? countTodos(todos)
-    : { all: 0, active: 0, completed: 0 };
-
-  const filteredByStatus = todos ? filterTodos(todos, filter) : [];
-  const searchedTodos = searchTodos(filteredByStatus, searchQuery);
-  const visible = sortTodos(searchedTodos, sort);
+ const counts = todos ? countTodos(todos) : { all: 0, active: 0, completed: 0 };
+ const filteredByStatus = todos ? filterTodos(todos, filter) : [];
+ const filteredByPriority = filterByPriority(filteredByStatus, priorityFilter);
+ const filteredByDue = filterByDueDate(filteredByPriority, dueFilter);
+ const searchedTodos = searchTodos(filteredByDue, searchQuery);
+ const visible = sortTodos(searchedTodos, sort);
 
   const handleSelectionChange = (todoId: string, nextSelected: boolean) => {
     setSelectedTodoIds((previousIds) => {
@@ -98,7 +103,11 @@ export function TodoList({
           <TodoSearch />
           <TodoFilters counts={counts} />
 
-          <TodoSortSelector />
+          <div className="ml-auto flex items-center gap-2">
+            <PriorityFilter />
+            <DueDateFilter />
+            <TodoSortSelector />
+          </div>
 
           {isLoading && (
             <div className="space-y-2">

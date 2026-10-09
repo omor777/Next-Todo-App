@@ -24,6 +24,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PriorityBadge } from "@/components/todos/priority-badge";
+import { DueDateIndicator } from "@/components/todos/due-date-indicator";
 
 const todoKeys = {
   all: ["todos"] as const,
@@ -185,6 +187,10 @@ export function TodoItem({
         ) : (
           <>
             <span className="flex-1">{todo.title}</span>
+
+            <PriorityBadge priority={todo.priority} />
+
+            {todo.dueDate && <DueDateIndicator dueDate={todo.dueDate} />}
 
             {todo.completed && <Badge variant="secondary">Done</Badge>}
 

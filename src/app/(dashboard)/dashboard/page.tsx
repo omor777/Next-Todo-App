@@ -1,13 +1,28 @@
-import { Todo } from "@/hooks/use-todos";
-import { serverFetch } from "@/lib/server-fetch";
 import { requireSession } from "@/lib/session";
-import { isTodoSort } from "@/lib/todo";
-import { isTodoFilter } from "@/lib/todos/filters";
-import { TodoFilter, TodoSort } from "@/types/todo";
+import { serverFetch } from "@/lib/server-fetch";
+import {
+  isTodoDueFilter,
+  isTodoFilter,
+  isTodoPriority,
+  isTodoSort,
+} from "@/lib/todo";
+import type {
+  Todo,
+  TodoDueFilter,
+  TodoFilter,
+  TodoPriority,
+  TodoSort,
+} from "@/types/todo";
 import { TodoList } from "./_components/todo-list";
 
 type DashboardPageProps = {
-  searchParams: Promise<{ filter?: string; q?: string; sort?: string }>;
+  searchParams: Promise<{
+    filter?: string;
+    q?: string;
+    sort?: string;
+    priority?: string;
+    due?: string;
+  }>;
 };
 
 export default async function DashboardPage({
@@ -21,6 +36,12 @@ export default async function DashboardPage({
     : "all";
   const searchQuery = (params.q ?? "").slice(0, 200);
   const sort: TodoSort = isTodoSort(params.sort) ? params.sort : "newest";
+  const priorityFilter: TodoPriority | null = isTodoPriority(params.priority)
+    ? params.priority
+    : null;
+  const dueFilter: TodoDueFilter | null = isTodoDueFilter(params.due)
+    ? params.due
+    : null;
 
   const todos = await serverFetch<Todo[]>("/api/todos");
 
@@ -32,6 +53,8 @@ export default async function DashboardPage({
         filter={filter}
         searchQuery={searchQuery}
         sort={sort}
+        priorityFilter={priorityFilter}
+        dueFilter={dueFilter}
       />
     </div>
   );

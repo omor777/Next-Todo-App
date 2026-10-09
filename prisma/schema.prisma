@@ -8,16 +8,26 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
 model Todo {
   id        String   @id @default(uuid())
   title     String
   completed Boolean  @default(false)
+  priority Priority @default(MEDIUM)
+  dueDate DateTime?
+
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // @@index([userId])
+  @@index([userId])
+  @@index([userId,dueDate])
 }
 
 // Better Auth will generate the User, Session, and Account models

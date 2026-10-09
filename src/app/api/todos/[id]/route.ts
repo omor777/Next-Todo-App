@@ -54,17 +54,24 @@ export async function PATCH(
     const parsed = updateTodoSchema.safeParse(body);
     if (!parsed.success) return validationError(parsed.error);
 
-    // Ownership check
-    const existing = await prisma.todo.findUnique({
-      where: { id },
-      select: { userId: true },
+    // Scoped ownership check: returns 404 whether the todo doesn't exist
+    // or belongs to another user. Prevents ID enumeration.
+    const existing = await prisma.todo.findFirst({
+      where: { id, userId: session.user.id },
+      select: { id: true },
     });
     if (!existing) return notFound("Todo not found");
-    if (existing.userId !== session.user.id) return forbidden();
+
+    const { dueDate, ...restData } = parsed.data;
 
     const todo = await prisma.todo.update({
       where: { id },
-      data: parsed.data,
+      data: {
+        ...restData,
+        // Preserve undefined (field not sent), clear on null, store ISO string as-is.
+        // Prisma's DateTime field accepts ISO 8601 strings natively.
+        ...(dueDate !== undefined && { dueDate }),
+      },
     });
 
     return success(todo, "Todo updated successfully");

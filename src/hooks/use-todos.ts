@@ -1,12 +1,15 @@
 "use client";
 
 import { api } from "@/lib/axios";
+import { TodoPriority } from "@/types/todo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type Todo = {
   id: string;
   title: string;
   completed: boolean;
+  priority: TodoPriority;
+  dueDate: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -20,7 +23,11 @@ async function fetchTodos(): Promise<Todo[]> {
   return api.get<Todo[]>("/api/todos");
 }
 
-async function createTodo(input: { title: string }): Promise<Todo> {
+async function createTodo(input: {
+  title: string;
+  priority?: TodoPriority;
+  dueDate?: string | null;
+}): Promise<Todo> {
   return api.post<Todo>("/api/todos", input);
 }
 
