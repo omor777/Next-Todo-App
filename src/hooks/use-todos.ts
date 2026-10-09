@@ -78,3 +78,19 @@ export function useDeleteTodo() {
     },
   });
 }
+
+async function clearCompletedTodos(): Promise<{ deletedCount: number }> {
+  return api.delete<{ deletedCount: number }>("/api/todos/completed");
+}
+
+// ADD THIS HOOK
+export function useClearCompletedTodos() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: clearCompletedTodos,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: todoKeys.all });
+    },
+  });
+}

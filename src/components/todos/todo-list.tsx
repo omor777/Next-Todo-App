@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TodoFilter } from "@/lib/todos/filters";
 import { TodoFilters } from "./todo-filters";
 import { TodoSearch } from "./todo-search";
+import { ClearCompletedButton } from "./clear-completed-button";
 
 type TodoListProps = {
   initialTodos: Todo[]
@@ -37,7 +38,10 @@ export function TodoList({ initialTodos, filter, searchQuery }: TodoListProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Your todos</CardTitle>
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle>Your todos</CardTitle>
+            <ClearCompletedButton completedCount={counts.completed} />
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <TodoSearch />
